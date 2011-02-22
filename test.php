@@ -6,6 +6,7 @@ require_once 'classes/xml-simple.php';
 
 DbConfig::setup();
 
+/*
 $aeroports = DB_DataObject::factory("aeroports");
 $aeroports->whereAdd("ae_full_name IS NULL");
 $aeroports->find();
@@ -51,6 +52,7 @@ while( $aeroports->fetch() ){
 	
 }
 
+*/
 // echo "</pre>";
 
 
@@ -90,5 +92,44 @@ while ( $linea ){
 fclose($fp);
 
 */
+
+// archivo del TAF
+$fp = fopen("http://weather.noaa.gov/pub/data/observations/metar/cycles/01Z.TXT", "r");
+
+$linea = fgets($fp, 4096);
+
+// nota: a las 11 de la noche, tengo que buscar el de la 1 de la maniana
+
+
+// CONDICIONES PARA LEER
+// cada TAF es un espacio en blanco
+// dentro del espacio en blanco, el informe del TAF es el siguiente:
+// SI ES AMMENDENT NO TENER EN CUENTA EL TAF (TERCER PARAMETRO DE LA PRIMERA LINEA)
+// SEGUNDA PALABRA DE LA SEGUNDA LINEA, ES EL CODIGO DEL AEROPUERTO
+// DE AHI SACO EL CODIGO DEL TAF
+
+while ( $linea ){
+	if( $i % 3 == 2 ) {
+		
+		$response = explode(" ", $linea);
+		$code = $response[0];
+		
+		// DB_DataObject::debugLevel(5);
+		
+		$aero = DB_DataObject::factory("aeroports");
+		$aero->ae_key = $code;
+		$aero->insert();
+		
+		
+	}
+	
+	
+	$linea = fgets($fp, 4096);
+	$i++;
+}
+
+
+
+fclose($fp);
 
 ?>

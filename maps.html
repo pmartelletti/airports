@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Aeropuertos</title>
+<script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
+<script>
+	$(document).ready(function() {
+		loadCountries();
+	})
+	
+	function loadCountries() {
+		var countrySelect = $("#ae_country");
+		countrySelect.append("<option>Select a country</option>");
+		$.post("gmaps.php", {action: "listCountries"}, function(response){
+			for(i=0; i < response.length; i++ ){
+				countrySelect.append("<option value='" + response[i] + "'>" + response[i] + "</option>")
+			}
+		}, "json");
+		countrySelect.change(loadStates);
+	}
+	
+	function loadStates() {
+		var stateSelect = $("#ae_states");
+		stateSelect.append("<option>Select a state</option>");
+		$.post("gmaps.php", {action: "listStates"}, function(response){
+			for( i=0; i < response.length; i++){
+				stateSelect.append("<option value='" + response[i] + "'>" + response[i] + "</option>");
+			}
+		}, "json")
+		stateSelect.change(loadAirports);
+	}
+	
+	function loadAirports() {
+		var airportSelect = $("#ae_name");
+		airportSelect.append("<option>Select an airport</option>");
+		$.post("gmaps.php", {action: "listAirports"}, function(response) {
+			for( i=0; i < response.length; i++) {
+				airportSelect.append("<option value='" + response[i].code + "'>" + response[i].name + "</option>");
+			}
+		}, "json");
+		airportSelect.change(loadMap);
+	}
+	
+	function loadMap() {
+		var mapContainer = $("#mapContainer");
+		$.post("gmaps.php", {action: "generateMap"}, function(image){
+			mapContainer.html(image);
+		})
+	}
+	
+</script>
+</head>
+<body>
+<select name="ae_country" id="ae_country"></select>
+
+<select name="ae_states" id="ae_states"></select>
+
+<select name="ae_name" id="ae_name"></select>
+
+<div id="mapContainer" style="margin: 0 auto">
+	
+</div>
+
+</body>
+</html>
